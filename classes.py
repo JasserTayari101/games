@@ -1,4 +1,6 @@
 from os import system #usage with clearing console
+import random
+
 
 class EmptyObject:
     def __init__(self,x,y):
@@ -125,15 +127,24 @@ class Map:
             print("#",end='')
         print()
         
-
+    def spawn_enemies(self):
+        spawned = 0
+        while spawned<3:
+            row = random.choice(self.map)
+            obj = random.choice(row)
+            
+            if isinstance(obj,EmptyObject):
+                row[obj.x] = Enemie(self,obj.x,obj.y)
+                spawned+=1
+                
+                
 map = Map(10,10)
 
 player = Player(map,0,0)
 
-enemie = Enemie(map,5,6)
+map.set(player)
 
-map.set(player,enemie)
-
+map.spawn_enemies()
 
 game_over = False
 
