@@ -1,0 +1,22 @@
+Our Map is represented with W(width)*H(height) cells each cell can hold one Object(class)
+
+Object can be:
+    -Actor:
+        -Enemie
+        -Player
+        ...
+    -Utility:
+        -Potion
+        -Weapon
+        ...
+
+-at first the player is placed in the map with initial weapons and then he has a timer where he must kill a number of randomely
+appearing enemies in the map by shooting them
+
+-The player can rotate and move in 8 directions representing all the tangent cells
+
+-A Map is represented by:
+    -width and height
+    -cells : that can contain an Object or Empty Object
+
+
