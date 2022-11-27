@@ -59,13 +59,9 @@ class Player(Actor):
     def __repr__(self):
         return 'P'
     
-    def get_input(self):
+    def get_input(self,move):
         """Choose from q/z/d/s/ to move"""
         choices = list('qzds')
-        move = input("Where to move?(q/z/d/s)? : ")
-        while move not in choices:
-            move = input("Where to move?(q/z/d/s)? : ")
-        
         self.move_to(move)
 
 
@@ -146,10 +142,17 @@ map.set(player)
 
 map.spawn_enemies()
 
-game_over = False
+def main(key):
+    if key.char in "qzds":
+        player.get_input(key.char)
+        map.update()
+        map.show()
 
-while not game_over:
-    map.show()
-    move = player.get_input()
-    map.update()
-    
+
+from pynput import keyboard
+
+
+map.show()
+
+with keyboard.Listener(on_press=main) as listener:
+    listener.join()
