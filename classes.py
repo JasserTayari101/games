@@ -3,11 +3,16 @@ import random
 
 
 class EmptyObject:
+    """A class to represent an empty cell in a map"""
+    
     def __init__(self,x,y):
         self.x = x
         self.y = y
         
-        
+    @property
+    def coords(self):
+        return (self.x,self.y)
+    
     def __bool__(self):
         return False
     
@@ -16,28 +21,36 @@ class EmptyObject:
     
 
 class Actor:
+    """A super class for a non empty cell like Enemie or Player"""
+    
     def __init__(self,map,x,y,hp=100):
         self.x = x
         self.y = y
         self.hp = hp    #health
-        self.map = map
+        self.map = map  #used for some reverse operations
         
     @staticmethod
     def check_movement(func):
-        """Check if the movement function can be done or not based on the map limits"""
-        def outer(selfe,*args):
-            old_x = selfe.x
-            old_y = selfe.y
-            func(selfe,args)
-            if selfe.x>=map.width or selfe.x<0 or selfe.y<0 or selfe.y>=map.height:
-                selfe.x = old_x
-                selfe.y = old_y
+        """Check if the movement function can be done or not based on the map limits if
+        it can't then undo them,based on the knowledge that all movement are 1 step at a time
+        """
+
+        def outer(self,*args):
+            old_x = self.x
+            old_y = self.y
+            func(self,args)
+            if self.x>=map.width or self.x<0 or self.y<0 or self.y>=map.height:
+                self.x = old_x
+                self.y = old_y
         return outer
     
+    @property
+    def coords(self):
+        return (self.x,self.y)
     
 class Player(Actor):
     def __init__(self,map,x,y,hp=100):
-        super().__init__(self,x,y,hp)
+        super().__init__(map,x,y,hp)
     
     @Actor.check_movement
     def move_to(self,move):
@@ -67,7 +80,7 @@ class Player(Actor):
 
 class Enemie(Actor):
     def __init__(self,map,x,y,hp=100):
-        super().__init__(self,x,y,hp)
+        super().__init__(map,x,y,hp)
     
     @Actor.check_movement
     def shortest_path_to(self,target):
@@ -88,6 +101,7 @@ class Map:
         self.map = tuple([EmptyObject(x=x,y=y) for x in range(width)] for y in range(height) )
         self.width = width
         self.height = height
+        self.spawned = 0    #number of enemies on the map
     
     def __bool__(self):
         return any([any(vector) for vector in self.map] )
@@ -105,8 +119,13 @@ class Map:
         for y,row in enumerate(self.map):
             for x,obj in enumerate(row):
                 if(obj.x!=x or obj.y!=y):
-                    self.map[y][x] = EmptyObject(x,y)
-                    self.map[obj.y][obj.x] = obj 
+                    self.map[y][x] = EmptyObject(x,y)   #put an emptyobject in the old position
+                    
+                    if(isinstance(self.map[obj.y][obj.x],Enemie)):  #if the player collide with an enemie decrease the number of enemies
+                        self.spawned-=1
+                    
+                    self.map[obj.y][obj.x] = obj
+                    
     
     def show(self):
         """Used to display the map"""
@@ -124,14 +143,13 @@ class Map:
         print()
         
     def spawn_enemies(self):
-        spawned = 0
-        while spawned<3:
+        while self.spawned<3:
             row = random.choice(self.map)
             obj = random.choice(row)
             
             if isinstance(obj,EmptyObject):
                 row[obj.x] = Enemie(self,obj.x,obj.y)
-                spawned+=1
+                self.spawned+=1
                 
                 
 map = Map(10,10)
@@ -139,15 +157,17 @@ map = Map(10,10)
 player = Player(map,0,0)
 
 map.set(player)
-
 map.spawn_enemies()
 
 def main(key):
-    if key.char in "qzds":
-        player.get_input(key.char)
-        map.update()
-        map.show()
-
+    try:
+        if key.char in "qzds":
+            player.get_input(key.char)
+            map.update()
+            map.show()
+            map.spawn_enemies()
+    except AttributeError:
+        print("You Move with (q/z/d/s)!!")
 
 from pynput import keyboard
 
