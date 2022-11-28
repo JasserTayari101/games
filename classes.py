@@ -77,7 +77,7 @@ class Player(Actor):
             self.x+=1
 
     def __repr__(self):
-        return 'P'
+        return '\u001b[31mP\u001b[0m'
     
     def get_input(self,move):
         """Choose from q/z/d/s/ to move"""
@@ -100,7 +100,7 @@ class Enemie(Actor):
             self.y+=(target.y-self.y)/abs(target.y-self.x)
 
     def __repr__(self):
-        return "E"
+        return "\u001b[32mE\u001b[0m"
 
 
 class Map:
@@ -154,7 +154,7 @@ class Map:
         print()
         
     def spawn_enemies(self):
-        while self.spawned<3:
+        while self.spawned<5:
             row = random.choice(self.map)
             obj = random.choice(row)
             
@@ -163,7 +163,7 @@ class Map:
                 self.spawned+=1
                 
                 
-map = Map(15,15)
+map = Map(20,20)
 
 player = Player(map,0,0)
 
