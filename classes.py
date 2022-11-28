@@ -39,9 +39,13 @@ class Actor:
             old_x = self.x
             old_y = self.y
             func(self,args)
+            
             if self.x>=map.width or self.x<0 or self.y<0 or self.y>=map.height:
                 self.x = old_x
                 self.y = old_y
+            else:
+                self.map.update(self,old_x,old_y)   #   if the movement is valid then call the map update function
+                
         return outer
     
     @property
@@ -114,18 +118,16 @@ class Map:
             assert isinstance(actor,Enemie) or isinstance(actor,Player) or isinstance(actor,EmptyObject)
             self.map[actor.y][actor.x] = actor
         
-    def update(self):
+    def update(self,obj,old_x,old_y):
         """Used to update object coords that has been changed"""
-        for y,row in enumerate(self.map):
-            for x,obj in enumerate(row):
-                if(obj.x!=x or obj.y!=y):
-                    self.map[y][x] = EmptyObject(x,y)   #put an emptyobject in the old position
-                    
-                    if(isinstance(self.map[obj.y][obj.x],Enemie)):  #if the player collide with an enemie decrease the number of enemies
-                        self.spawned-=1
-                    
-                    self.map[obj.y][obj.x] = obj
-                    
+        if(obj.x!=old_x or obj.y!=old_y):
+            self.map[old_y][old_x] = EmptyObject(old_x,old_y)   #put an emptyobject in the old position
+            
+            if(isinstance(self.map[obj.y][obj.x],Enemie)):  #if the player collide with an enemie decrease the number of enemies
+                self.spawned-=1
+            
+            self.map[obj.y][obj.x] = obj
+            
     
     def show(self):
         """Used to display the map"""
@@ -152,7 +154,7 @@ class Map:
                 self.spawned+=1
                 
                 
-map = Map(10,10)
+map = Map(15,15)
 
 player = Player(map,0,0)
 
@@ -163,7 +165,6 @@ def main(key):
     try:
         if key.char in "qzds":
             player.get_input(key.char)
-            map.update()
             map.show()
             map.spawn_enemies()
     except AttributeError:
