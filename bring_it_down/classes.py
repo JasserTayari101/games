@@ -1,7 +1,6 @@
 from os import system #usage with clearing console
 import random
 from datetime import datetime as dt
-from pynput import keyboard
 
 
 
@@ -110,7 +109,6 @@ class Map:
         self.height = height
         self.spawned = 0    #number of enemies on the map
         self.timer = dt.now()
-        self.counter = 0
     
     def __bool__(self):
         return any([any(vector) for vector in self.map] )
@@ -132,14 +130,17 @@ class Map:
                 self.spawned-=1
             
             self.map[obj.y][obj.x] = obj
-            
     
+    @property
+    def counter(self):
+        counter = dt.now() - self.timer
+        return f"{counter.seconds//60}:{counter.seconds-(counter.seconds//60)*60}"
+        
+        
     def show(self):
         """Used to display the map"""
         system('clear')
         
-        self.counter = dt.now() - self.timer
-        print(f"{self.counter.seconds//60}:{self.counter.seconds-(self.counter.seconds//60)*60}")
         
         for _ in range(2*(self.width+1)):
             print("#",end='')
@@ -152,6 +153,17 @@ class Map:
         for _ in range(2*(self.width+1)):
             print("#",end='')
         print()
+        #print the counter
+        print(self.counter)
+    
+    def update_counter(self):
+        
+        #calculate the how many to go back based on the length of the counter
+        back = len(self.counter)
+        
+        print("\u001b[1A%s"%self.counter)
+        
+    
         
     def spawn_enemies(self):
         while self.spawned<5:
@@ -163,7 +175,7 @@ class Map:
                 self.spawned+=1
                 
                 
-map = Map(20,20)
+map = Map(15,15)
 
 player = Player(map,0,0)
 
@@ -171,9 +183,10 @@ map.set(player)
 map.spawn_enemies()
 
 def main(key):
+    print(key)
     try:
-        if key.char in "qzds":
-            player.get_input(key.char)
+        if key in "qzds":
+            player.get_input(key)
             map.show()
             map.spawn_enemies()
     except AttributeError:
@@ -183,5 +196,19 @@ def main(key):
 
 map.show()
 
-with keyboard.Listener(on_press=main) as listener:
-    listener.join()
+import keyboard,time
+
+while True:
+    map.update_counter()
+    if keyboard.is_pressed('q'):
+        main('q')
+    if keyboard.is_pressed('z'):
+        main('z')
+    if keyboard.is_pressed('d'):
+        main('d')
+    if keyboard.is_pressed('s'):
+        main('s')
+    if keyboard.is_pressed('k'):
+        print('Game Over!!!')
+        break
+    time.sleep(.1)
