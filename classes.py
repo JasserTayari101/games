@@ -1,5 +1,8 @@
 from os import system #usage with clearing console
 import random
+from datetime import datetime as dt
+from pynput import keyboard
+
 
 
 class EmptyObject:
@@ -106,6 +109,8 @@ class Map:
         self.width = width
         self.height = height
         self.spawned = 0    #number of enemies on the map
+        self.timer = dt.now()
+        self.counter = 0
     
     def __bool__(self):
         return any([any(vector) for vector in self.map] )
@@ -132,6 +137,10 @@ class Map:
     def show(self):
         """Used to display the map"""
         system('clear')
+        
+        self.counter = dt.now() - self.timer
+        print(f"{self.counter.seconds//60}:{self.counter.seconds-(self.counter.seconds//60)*60}")
+        
         for _ in range(2*(self.width+1)):
             print("#",end='')
         print()
@@ -170,7 +179,6 @@ def main(key):
     except AttributeError:
         print("You Move with (q/z/d/s)!!")
 
-from pynput import keyboard
 
 
 map.show()
