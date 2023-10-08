@@ -38,11 +38,15 @@ class Actor:
         """
 
         def outer(self,*args):
+            # store old coordinates
             old_x = self.x
             old_y = self.y
+            #try applying the movement function
             func(self,args)
             
+            #check in case we are out of the map
             if self.x>=map.width or self.x<0 or self.y<0 or self.y>=map.height:
+                # return old coord (movement is undone)
                 self.x = old_x
                 self.y = old_y
             else:
@@ -108,7 +112,7 @@ class Map:
         self.width = width
         self.height = height
         self.spawned = 0    #number of enemies on the map
-        self.timer = dt.now()
+        self.timer = dt.now()     # record first time map is created
     
     def __bool__(self):
         return any([any(vector) for vector in self.map] )
@@ -158,7 +162,7 @@ class Map:
     
     def update_counter(self):
         
-        #calculate the how many to go back based on the length of the counter
+        #calculate how many digits to go back(delete old counter), based on the length of the counter
         back = len(self.counter)
         
         print("\u001b[1A%s"%self.counter)
@@ -183,7 +187,6 @@ map.set(player)
 map.spawn_enemies()
 
 def main(key):
-    print(key)
     try:
         if key in "qzds":
             player.get_input(key)
